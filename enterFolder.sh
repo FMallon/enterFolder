@@ -1,61 +1,120 @@
-#!/bin/bash
+#!/bin/sh
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+input=$1
 
-enterFolder(){
+# Finds the result from tree based on 
+result=$(tree -d -L 1 | grep $input | grep -v -- 'directories$' | sed 's/^[^0-9A-Za-z]*//')
 
-	result=$(tree -d -L 1 | grep $1 | sed 's/^[^0-9A-Za-z]*//')
-  
-  #define an array
-  declare -a dirList
-  #in docs 'enter My' returns MyProjects\nMyPythonScripts\nMyShellScripts
-  #can maybe iterate through new line in 'echo "$result"' to allow option for a list in number form or dropdown menu
-  #create an array from results of all the options?
+echo $result
 
-  #-debug
-  #echo "$result" > debug_file.txt
+# initialize the array for directories.
+dirList=()
+#declare -a dirList
 
-  while IFS= read -r directory; do
+getDirectories(){
+
+  # read in results into array dirList
+  while IFS= read -r directory; do 
+    
     if [ -n "$directory" ]; then
       dirList+=("$directory")
     fi
-  done <<<"$result"    
-
-  #-debug
-  #printf '%q\n' "${dirList[0]}" > debug_file.txt
   
-  dirListLength=${#dirList[@]}
+  done <<<"$result"
+
+  dirListLength="${#dirList[@]}"
+
+}
+
+
+# this is unnecessary now, but keep for future use! 
+filterDirectories(){
+
+  # store into a temp array, then transfer elements back into dirList to get rid of the final element from "tree" that is unnecessary
+  #--cannot use "unset -v" as it doesn't actually remove the last element, just its value
+  
+  local temp_array=()
+    
+
+    # zShell's array index begins at 1, not 0; so accounting for this here! 
+    if [ -n "$BASH_VERSION" ]; then
+
+      for (( i=0; i<$dirListLength; i++)); do
+
+        temp_array[i]=${dirList[i]}
+
+      done
+
+    elif [ -n "$ZSH_VERSION" ]; then
+
+      for (( i=1; i<$dirListLength; i++)); do
+    
+        temp_array[i]=${dirList[i]}
+
+      done
+
+    fi
+
+    #-debug
+    #echo "Temp array is: ${temp_array[@]}"
+    dirList=("${temp_array[@]}")
+
+    # reset the dirListLength
+    dirListLength=${#dirList[@]}
+
+}
+
+
+enterFolder(){
+
+  getDirectories
+
   #-debug
-  #echo "$dirListLength" 
+  #echo -e "Directory size is: $dirListLength\n${dirList[@]}"
 
+  # should allow for smooth use with 'enter .' to display all available directories 
+  if [[ $dirListLength -gt 1 || "$input" == "." ]]; then
 
-  if [ $dirListLength -gt 1 ]; then
-    
-    echo -e "\nThere are ${dirListLength} matching directories:\n"
-    
+    echo -e "\nThere are $dirListLength matching directories:\n"
+
     CHOICE="Choose desired directory by number: "
-    
+
     select directory in "${dirList[@]}"; do
 
       directory_choice="$directory"
-      cd "$directory_choice" && break
+
+      cd "$directory_choice" && 
+      break
 
     done
+
     echo -e "\n"
-  
+
+  # if only one possible option, then proceed; of course, Bash and zShell arrays start with [0] & [1] respectively
   elif [ $dirListLength -eq 1 ]; then
-    cd "${dirList[0]}"
-  
+
+    if [ -n "$BASH_VERSION" ]; then
+
+      cd "${dirList[0]}"
+
+    elif [ -n "$ZSH_VERSION" ]; then
+
+      cd "${dirList[1]}"
+
+    fi
 
   else
+    
     echo "Cannot find match, please re-try a different pattern!"
+
   fi
+
 }
 
-enterFolder $1
+main(){
 
-#Take in result.  Iterate through result, and asign to array based on if there is a next line.
-#if array.length() > 1, then do some shit.
-#
-#This script works, however, it's not as clean as I want it:
-# -issues using CHOICE/PS3 input variable.  Can use it in a while loop or if statement.  
+enterFolder
+
+}
+
+main $1
