@@ -5,7 +5,8 @@ input=$1
 # Finds the result from tree based on 
 result=$(tree -d -L 1 | grep $input | grep -v -- 'directories$' | sed 's/^[^0-9A-Za-z]*//')
 
-echo $result
+#-debug
+#echo $result
 
 # initialize the array for directories.
 dirList=()
@@ -28,41 +29,41 @@ getDirectories(){
 
 
 # this is unnecessary now, but keep for future use! 
-filterDirectories(){
+#filterDirectories(){
 
   # store into a temp array, then transfer elements back into dirList to get rid of the final element from "tree" that is unnecessary
   #--cannot use "unset -v" as it doesn't actually remove the last element, just its value
   
-  local temp_array=()
+#  local temp_array=()
     
 
     # zShell's array index begins at 1, not 0; so accounting for this here! 
-    if [ -n "$BASH_VERSION" ]; then
+#    if [ -n "$BASH_VERSION" ]; then
 
-      for (( i=0; i<$dirListLength; i++)); do
+#      for (( i=0; i<$dirListLength; i++)); do
 
-        temp_array[i]=${dirList[i]}
+#        temp_array[i]=${dirList[i]}
 
-      done
+#      done
 
-    elif [ -n "$ZSH_VERSION" ]; then
+#    elif [ -n "$ZSH_VERSION" ]; then
 
-      for (( i=1; i<$dirListLength; i++)); do
+#      for (( i=1; i<$dirListLength; i++)); do
     
-        temp_array[i]=${dirList[i]}
+#        temp_array[i]=${dirList[i]}
 
-      done
+#     done
 
-    fi
+#    fi
 
-    #-debug
-    #echo "Temp array is: ${temp_array[@]}"
-    dirList=("${temp_array[@]}")
+#    #-debug
+#    #echo "Temp array is: ${temp_array[@]}"
+#    dirList=("${temp_array[@]}")
 
-    # reset the dirListLength
-    dirListLength=${#dirList[@]}
+#    # reset the dirListLength
+#    dirListLength=${#dirList[@]}
 
-}
+#}
 
 
 enterFolder(){
