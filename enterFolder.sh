@@ -3,7 +3,7 @@
 input=$1
 
 # Finds the result from tree based on 
-result=$(tree -d -L 1 | grep $input | grep -v -- 'directories$' | sed 's/^[^0-9A-Za-z]*//')
+result=$(tree -d -L 1 | grep $input | grep -v -- 'directories$' | sed 's/^[^0-9A-Za-z]*//' | sed 's/ ->.*//')
 
 #-debug
 #echo $result
