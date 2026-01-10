@@ -112,10 +112,10 @@ enterFolder(){
 
 }
 
-main(){
+main_enterFolder(){
 
 enterFolder
 
 }
 
-main $1
+main_enterFolder $1
